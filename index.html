@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VM Hub | Marketplace San Luis (Compra y Venta Directa)</title>
+  <meta name="description" content="Plataforma comercial moderna y colaborativa para la compra y venta en San Luis Capital, Villa Mercedes, Merlo y toda la provincia." />
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              950: '#070C1A',
+              900: '#0B132B',
+              850: '#0F1A34',
+              800: '#142247',
+              700: '#1C2F5E',
+              600: '#263F7A',
+              500: '#3455A4',
+              100: '#E6ECF8',
+              50: '#F0F4FC',
+            },
+            gold: {
+              50: '#FAF7EE',
+              100: '#F4ECD4',
+              200: '#E8D7A6',
+              300: '#DFC27D',
+              400: '#D5B15A',
+              500: '#C5A059', // Dorado identitario VM Hub
+              600: '#AF883D',
+              700: '#8A6728',
+              800: '#664B1A',
+              900: '#463311'
+            }
+          },
+          boxShadow: {
+            'soft-3d': '0 10px 25px -4px rgba(11, 19, 43, 0.07), 0 4px 6px -2px rgba(11, 19, 43, 0.03)',
+            'soft-3d-hover': '0 20px 35px -5px rgba(11, 19, 43, 0.12), 0 8px 12px -3px rgba(11, 19, 43, 0.05)',
+            'gold-glow': '0 0 25px rgba(197, 160, 89, 0.28)',
+            'navy-deep': '0 20px 45px -15px rgba(7, 12, 26, 0.6)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Supabase JS Client v2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Google Maps Platform JavaScript API Bootstrap Loader -->
+  <!-- Source: Google Maps Platform Code Assist -->
+  <script>
+    // Bootstrap loader oficial de Google Maps Platform
+    (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+      v: "weekly"
+    });
+  </script>
+
+  <style>
+    /* Estilos personalizados para Google Maps Platform y Fichas InfoWindow */
+    .custom-gmp-marker {
+      cursor: pointer;
+      transform-origin: bottom center;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .custom-gmp-marker:hover {
+      transform: scale(1.15);
+      z-index: 99999 !important;
+    }
+    .custom-gmp-marker.selected-marker-active {
+      transform: scale(1.28) !important;
+      z-index: 999999 !important;
+    }
+    .custom-gmp-marker.selected-marker-active > div > div:first-child {
+      ring-width: 4px !important;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.95), 0 0 10px rgba(217, 119, 6, 0.9) !important;
+      border: 2px solid #ffffff !important;
+    }
+    .gm-style-iw {
+      padding: 0 !important;
+      border-radius: 1.25rem !important;
+      overflow: hidden !important;
+      border: 1px solid rgba(226, 232, 240, 0.8) !important;
+      box-shadow: 0 20px 25px -5px rgba(11, 19, 43, 0.25), 0 8px 10px -6px rgba(11, 19, 43, 0.2) !important;
+    }
+    .gm-style-iw-d {
+      padding: 0 !important;
+      overflow: hidden !important;
+      max-height: 480px !important;
+    }
+    .gm-style-iw button.gm-ui-hover-effect {
+      top: 6px !important;
+      right: 6px !important;
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-radius: 9999px !important;
+      width: 28px !important;
+      height: 28px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+      border: 1px solid #e2e8f0 !important;
+      z-index: 10 !important;
+    }
+    /* Estilizado de Google Places Autocomplete */
+    gmp-place-autocomplete {
+      width: 100%;
+      border-radius: 0.75rem;
+      font-family: inherit;
+    }
+    /* Estilos personalizados identidad VM Hub */
+    .bg-navy-metallic {
+      background: radial-gradient(circle at 85% 15%, rgba(197, 160, 89, 0.12) 0%, transparent 45%),
+                  radial-gradient(circle at 10% 85%, rgba(30, 58, 95, 0.35) 0%, transparent 50%),
+                  linear-gradient(135deg, #070C1A 0%, #0B132B 45%, #142247 100%);
+    }
+
+    .bg-gold-metallic {
+      background: linear-gradient(135deg, #F3E5AB 0%, #DFC27D 30%, #C5A059 70%, #A67D28 100%);
+    }
+
+    .bg-gold-metallic:hover {
+      background: linear-gradient(135deg, #FFF0BD 0%, #E8D090 30%, #D4AF37 70%, #B88B2F 100%);
+    }
+
+    .text-gold-gradient {
+      background: linear-gradient(135deg, #F4ECD4 0%, #DFC27D 45%, #C5A059 80%, #E8D7A6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .border-metallic-subtle {
+      border-color: rgba(197, 160, 89, 0.22);
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Estilos personalizados para Leaflet y Marcadores VM Hub */
+    .leaflet-popup-content-wrapper {
+      background: transparent !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      border-radius: 1.25rem !important;
+      overflow: hidden !important;
+    }
+    .leaflet-popup-content {
+      margin: 0 !important;
+      line-height: normal !important;
+    }
+    .leaflet-popup-tip-container {
+      margin-top: -1px;
+    }
+    .leaflet-popup-tip {
+      background: #0B132B !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+    .leaflet-container {
+      font-family: inherit !important;
+      z-index: 10 !important;
+      background-color: #f1f5f9;
+    }
+    .custom-leaflet-marker {
+      background: transparent !important;
+      border: none !important;
+    }
+    .leaflet-container a.leaflet-popup-close-button {
+      top: 10px;
+      right: 10px;
+      padding: 4px;
+      color: #ffffff;
+      background: rgba(11, 19, 43, 0.7);
+      backdrop-filter: blur(4px);
+      border-radius: 9999px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.2s;
+    }
+    .leaflet-container a.leaflet-popup-close-button:hover {
+      background: #0B132B;
+      color: #DFC27D;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-gold-500 selection:text-navy-950">
+
+  <!-- ==================== BARRA SUPERIOR / NAVBAR VM HUB ==================== -->
+  <header class="sticky top-0 z-30 bg-[#0B132B]/95 backdrop-blur-md border-b border-[#1C2F5E]/70 shadow-md transition-shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      
+      <!-- Logo VM Hub y Branding San Luis -->
+      <a href="#" class="flex items-center gap-3.5 group">
+        <div class="relative w-12 h-12 rounded-xl overflow-hidden bg-[#070C1A] border border-gold-500/40 p-0.5 shadow-md shadow-navy-950/60 group-hover:border-gold-400 group-hover:scale-105 transition-all">
+          <img 
+            src="vm-hub-logo.jpg" 
+            alt="VM Hub Logo" 
+            class="w-full h-full object-cover rounded-lg"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          />
+          <div style="display:none;" class="w-full h-full rounded-lg bg-gradient-to-tr from-[#0B132B] to-[#1C2F5E] items-center justify-center text-gold-400 font-extrabold text-xs">
+            VM
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-xl text-white tracking-tight flex items-center gap-1">
+              VM <span class="text-gold-gradient font-black">Hub</span>
+            </span>
+            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-gold-500/15 text-gold-300 border border-gold-500/30 tracking-wider">
+              San Luis
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block font-medium">Ecosistema de compra y venta comercial</p>
+        </div>
+      </a>
+
+      <!-- Buscador en barra (visible en tablet/desktop) -->
+      <div class="hidden md:flex flex-1 max-w-lg mx-6 relative">
+        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input 
+          type="text" 
+          id="search-input" 
+          oninput="handleSearchInput(this.value)"
+          placeholder="¿Qué buscas en San Luis? (vehículos, inmuebles, tecnología, servicios...)" 
+          class="w-full pl-11 pr-4 py-2.5 rounded-full bg-[#0F1A34] border border-[#1C2F5E] focus:border-gold-400 focus:bg-[#142247] focus:outline-none focus:ring-4 focus:ring-gold-500/10 text-sm transition-all text-white placeholder-slate-400 shadow-inner"
+        />
+      </div>
+
+      <!-- Acciones de cabecera -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Botón Estado de Supabase -->
+        <button 
+          id="supabase-status-btn"
+          type="button"
+          onclick="openSupabaseModal()"
+          class="p-2 sm:px-3 sm:py-2 rounded-xl border border-gold-500/30 bg-[#0F1A34] hover:bg-[#142247] text-gold-200 transition-all text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+          title="Configuración de base de datos Supabase"
+        >
+          <span id="supabase-status-dot" class="w-2 h-2 rounded-full bg-gold-400 animate-pulse"></span>
+          <span id="supabase-status-text" class="hidden sm:inline">Supabase</span>
+        </button>
+
+        <!-- Botón Configuración de Google Maps -->
+        <button 
+          id="gmaps-status-btn"
+          type="button"
+          onclick="openGoogleMapsModal()"
+          class="p-2 sm:px-3 sm:py-2 rounded-xl border border-gold-500/30 bg-[#0F1A34] hover:bg-[#142247] text-gold-200 transition-all text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+          title="Configurar Google Maps JS API y Places Autocomplete"
+        >
+          <span id="gmaps-status-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span class="inline-flex items-center gap-1 text-slate-200"><i class="fab fa-google text-xs text-gold-400"></i> <span id="gmaps-status-text" class="hidden sm:inline">Google Maps</span></span>
+        </button>
+
+        <!-- Botón Ver Favoritos -->
+        <button 
+          id="filter-favorites-btn"
+          class="relative p-2.5 sm:px-3.5 sm:py-2 rounded-xl border border-[#1C2F5E] bg-[#0F1A34] text-slate-300 hover:text-red-400 hover:border-red-400/40 hover:bg-[#142247] transition-all text-xs font-semibold flex items-center gap-2"
+          title="Mis favoritos guardados"
+        >
+          <i class="fas fa-heart text-sm text-red-500"></i>
+          <span class="hidden sm:inline">Favoritos</span>
+          <span id="fav-count-badge" class="hidden bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-[18px] text-center">0</span>
+        </button>
+
+        <!-- Botón Publicar Aviso (CTA Dorado Principal) -->
+        <button 
+          type="button" 
+          onclick="openPublishModal()"
+          class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2.5 rounded-xl bg-gold-metallic text-navy-950 text-xs sm:text-sm font-extrabold shadow-md shadow-gold-500/20 hover:shadow-gold-500/35 border border-amber-200/40 active:scale-95 transition-all cursor-pointer"
+        >
+          <i class="fas fa-plus-circle text-base text-navy-950"></i>
+          <span class="hidden xs:inline sm:inline">Publicar Aviso</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Buscador móvil integrado -->
+    <div class="md:hidden px-4 pb-3 pt-1">
+      <div class="relative">
+        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input 
+          type="text" 
+          id="mobile-search-input"
+          oninput="handleSearchInput(this.value)"
+          placeholder="Buscar avisos, negocios o localidades..." 
+          class="w-full pl-11 pr-4 py-2.5 rounded-full bg-[#0F1A34] border border-[#1C2F5E] focus:border-gold-400 focus:outline-none text-sm text-white placeholder-slate-400 shadow-inner"
+        />
+      </div>
+    </div>
+  </header>
+
+
+  <!-- ==================== BANNER DE ESTADO SUPABASE ==================== -->
+  <div id="supabase-banner" class="bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 text-slate-200 py-2.5 px-4 text-xs font-medium transition-all border-b border-gold-500/20 hidden">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        <span>⚡ <strong>Red Realtime Activa:</strong> Las publicaciones comerciales se sincronizan al instante en toda la provincia.</span>
+      </div>
+      <button onclick="openSupabaseModal()" class="text-gold-300 hover:text-gold-200 underline font-semibold cursor-pointer whitespace-nowrap">
+        Configuración
+      </button>
+    </div>
+  </div>
+
+  <div id="supabase-pending-banner" class="bg-gradient-to-r from-navy-900 via-navy-850 to-navy-900 text-slate-200 py-2.5 px-4 text-xs font-medium transition-all border-b border-gold-500/30">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <i class="fas fa-database text-gold-400"></i>
+        <span><strong>Conexión Cloud:</strong> Sincroniza Supabase para guardar tus avisos en tiempo real en la nube.</span>
+      </div>
+      <button onclick="openSupabaseModal()" class="bg-gold-metallic text-navy-950 px-3.5 py-1 rounded-lg font-bold hover:shadow-md transition-all shadow-sm whitespace-nowrap">
+        Conectar Supabase
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ==================== HERO CORPORATIVO VM HUB ==================== -->
+  <section class="bg-navy-metallic text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden border-b border-[#1C2F5E]">
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="max-w-3xl">
+        
+        <!-- Badge institucional -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0F1A34]/80 text-gold-300 border border-gold-500/30 text-xs font-bold mb-4 shadow-sm backdrop-blur-sm">
+          <i class="fas fa-shield-halved text-gold-400"></i>
+          <span>VM Hub &bull; Plataforma Oficial de Comercio Puntano</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight mb-4 text-white">
+          El punto de encuentro para el comercio y la comunidad de <span class="text-gold-gradient">San Luis</span>.
+        </h1>
+
+        <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-8 max-w-2xl">
+          Conectamos negocios, emprendedores y usuarios particulares en <strong class="text-white">Villa Mercedes, San Luis Capital, Merlo</strong> y toda la provincia. Contacto directo por WhatsApp, sin comisiones ni intermediarios.
+        </p>
+
+        <!-- Estadísticas y valores de seriedad -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-white/10 text-xs text-slate-300">
+          <div class="flex items-center gap-3 bg-[#0B132B]/60 p-3 rounded-xl border border-white/5">
+            <div class="w-8 h-8 rounded-lg bg-gold-500/10 border border-gold-500/20 text-gold-400 flex items-center justify-center text-sm">
+              <i class="fas fa-map-location-dot"></i>
+            </div>
+            <div>
+              <span class="block font-bold text-white">Toda la Provincia</span>
+              <span class="text-[11px] text-slate-400">Capital, VM, Merlo y más</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 bg-[#0B132B]/60 p-3 rounded-xl border border-white/5">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm">
+              <i class="fab fa-whatsapp"></i>
+            </div>
+            <div>
+              <span class="block font-bold text-white">Trato Directo</span>
+              <span class="text-[11px] text-slate-400">Conversación sin esperas</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 bg-[#0B132B]/60 p-3 rounded-xl border border-white/5">
+            <div class="w-8 h-8 rounded-lg bg-gold-500/10 border border-gold-500/20 text-gold-400 flex items-center justify-center text-sm">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <div>
+              <span class="block font-bold text-white">Tecnología Realtime</span>
+              <span id="data-source-label" class="text-[11px] text-slate-400">Supabase Cloud</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== BARRA DE CATEGORÍAS ==================== -->
+  <section class="bg-white border-b border-slate-200/90 sticky top-20 z-20 shadow-sm backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div id="categories-container" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+        <!-- Renderizado dinámico desde app.js con estilos VM Hub -->
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== FILTROS Y CONTENIDO PRINCIPAL ==================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+    
+    <!-- Barra de control: Ciudad, Orden y Contador -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-slate-200/90">
+      
+      <!-- Contador de resultados -->
+      <div class="flex items-center gap-3">
+        <h2 class="text-xl font-extrabold text-navy-950 tracking-tight">Catálogo Comercial</h2>
+        <span id="results-count" class="bg-navy-900 text-gold-300 border border-gold-500/30 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+          Cargando...
+        </span>
+      </div>
+
+      <!-- Selectores de filtro corporativos y cambio de vista -->
+      <div class="flex flex-wrap items-center gap-3">
+        
+        <!-- Filtro por Localidad de San Luis -->
+        <div class="flex items-center gap-2 bg-white border border-slate-200 hover:border-gold-500/50 rounded-xl px-3.5 py-2 shadow-sm text-xs transition-colors">
+          <i class="fas fa-map-marker-alt text-gold-600"></i>
+          <label for="city-filter" class="text-slate-500 font-medium sr-only">Zona:</label>
+          <select id="city-filter" class="bg-transparent font-semibold text-navy-950 outline-none cursor-pointer">
+            <option value="all">Toda la Provincia de San Luis</option>
+            <option value="Villa Mercedes">Villa Mercedes (VM Hub)</option>
+            <option value="San Luis Capital">San Luis Capital</option>
+            <option value="Merlo">Villa de Merlo</option>
+            <option value="Juana Koslay">Juana Koslay</option>
+            <option value="La Punta">La Punta</option>
+            <option value="Potrero de los Funes">Potrero de los Funes</option>
+            <option value="El Trapiche">El Trapiche</option>
+            <option value="Carpintería">Carpintería</option>
+            <option value="Concarán">Concarán</option>
+            <option value="Santa Rosa del Conlara">Santa Rosa del Conlara</option>
+            <option value="Quines">Quines</option>
+          </select>
+        </div>
+
+        <!-- Filtro por Orden de Precio / Fecha -->
+        <div class="flex items-center gap-2 bg-white border border-slate-200 hover:border-gold-500/50 rounded-xl px-3.5 py-2 shadow-sm text-xs transition-colors">
+          <i class="fas fa-sort-amount-down text-slate-400"></i>
+          <select id="sort-filter" class="bg-transparent font-semibold text-navy-950 outline-none cursor-pointer">
+            <option value="newest">Más recientes</option>
+            <option value="price-asc">Menor precio primero</option>
+            <option value="price-desc">Mayor precio primero</option>
+          </select>
+        </div>
+
+        <!-- Selector de Modo de Vista (Dividida / Mapa / Cuadrícula) -->
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner text-xs">
+          <button 
+            type="button" 
+            id="view-btn-split" 
+            onclick="setViewMode('split')" 
+            class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 bg-white text-navy-950 shadow-sm"
+            title="Vista dividida: Mapa interactivo y catálogo lado a lado"
+          >
+            <i class="fas fa-columns text-gold-600"></i>
+            <span class="hidden sm:inline">Dividida</span>
+          </button>
+          <button 
+            type="button" 
+            id="view-btn-map" 
+            onclick="setViewMode('map')" 
+            class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 text-slate-600 hover:text-navy-950"
+            title="Vista de Mapa Interactivo completo"
+          >
+            <i class="fas fa-map-location-dot text-slate-500"></i>
+            <span>Mapa</span>
+          </button>
+          <button 
+            type="button" 
+            id="view-btn-grid" 
+            onclick="setViewMode('grid')" 
+            class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 text-slate-600 hover:text-navy-950"
+            title="Vista tradicional de solo Cuadrícula de Avisos"
+          >
+            <i class="fas fa-th-large text-slate-500"></i>
+            <span class="hidden sm:inline">Avisos</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ==================== CONTENEDOR PRINCIPAL: MAPA INTERACTIVO + CATÁLOGO ==================== -->
+    <div id="catalog-layout-container" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+      <!-- ==================== PANEL DEL MAPA INTERACTIVO ==================== -->
+      <section id="map-section" class="lg:col-span-5 w-full transition-all duration-300">
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-soft-3d overflow-hidden lg:sticky lg:top-36">
+          
+          <!-- Cabecera del Mapa -->
+          <div class="p-4 bg-navy-900 text-white flex items-center justify-between border-b border-[#1C2F5E]">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-gold-metallic text-navy-950 flex items-center justify-center font-black text-xs shadow-md">
+                <i class="fas fa-map-location-dot"></i>
+              </div>
+              <div>
+                <h3 class="font-extrabold text-sm text-white flex items-center gap-2">
+                  Mapa de Comercios
+                  <span id="map-count-badge" class="px-2 py-0.5 rounded-full bg-gold-500/20 text-gold-300 text-[10px] font-bold border border-gold-500/30">
+                    Cargando...
+                  </span>
+                </h3>
+                <p class="text-[11px] text-slate-300">Geolocalización en tiempo real (San Luis)</p>
+              </div>
+            </div>
+
+            <!-- Botón GPS mi ubicación -->
+            <button 
+              type="button" 
+              onclick="locateUserOnMap()" 
+              class="px-2.5 py-1.5 rounded-xl bg-[#0F1A34] hover:bg-[#142247] border border-gold-500/30 text-gold-300 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+              title="Centrar en mi ubicación actual GPS"
+            >
+              <i class="fas fa-crosshairs text-gold-400"></i>
+              <span class="hidden md:inline">Cerca de mí</span>
+            </button>
+          </div>
+
+          <!-- Barra de accesos directos por localidad de San Luis -->
+          <div class="px-3.5 py-2 bg-slate-50 border-b border-slate-100 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
+            <span class="text-[11px] font-bold text-slate-400 whitespace-nowrap mr-1"><i class="fas fa-compass"></i> Ir a:</span>
+            <button onclick="focusCity('all')" class="city-quick-btn px-2.5 py-1 rounded-lg bg-white hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold whitespace-nowrap text-[11px] transition-colors">
+              🏔️ Provincia
+            </button>
+            <button onclick="focusCity('Villa Mercedes')" class="city-quick-btn px-2.5 py-1 rounded-lg bg-white hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold whitespace-nowrap text-[11px] transition-colors">
+              📍 Villa Mercedes
+            </button>
+            <button onclick="focusCity('San Luis Capital')" class="city-quick-btn px-2.5 py-1 rounded-lg bg-white hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold whitespace-nowrap text-[11px] transition-colors">
+              📍 San Luis Capital
+            </button>
+            <button onclick="focusCity('Merlo')" class="city-quick-btn px-2.5 py-1 rounded-lg bg-white hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold whitespace-nowrap text-[11px] transition-colors">
+              📍 Merlo
+            </button>
+            <button onclick="focusCity('Potrero de los Funes')" class="city-quick-btn px-2.5 py-1 rounded-lg bg-white hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold whitespace-nowrap text-[11px] transition-colors">
+              📍 Potrero / Koslay
+            </button>
+          </div>
+
+          <!-- Leyenda de colores por rubro (interactiva) -->
+          <div class="px-3.5 py-2 bg-white border-b border-slate-100 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[11px]">
+            <span class="font-bold text-slate-400 whitespace-nowrap text-[10px] uppercase">Rubros:</span>
+            <button onclick="setCategory('Gastronomía y Cafeterías')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-medium whitespace-nowrap transition-colors">
+              <span class="w-2 h-2 rounded-full bg-amber-600"></span> Cafeterías
+            </button>
+            <button onclick="setCategory('Moda y Ropa')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-800 border border-pink-200 font-medium whitespace-nowrap transition-colors">
+              <span class="w-2 h-2 rounded-full bg-pink-600"></span> Indumentaria
+            </button>
+            <button onclick="setCategory('Tecnología')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 font-medium whitespace-nowrap transition-colors">
+              <span class="w-2 h-2 rounded-full bg-sky-600"></span> Tecnología
+            </button>
+            <button onclick="setCategory('Servicios')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-medium whitespace-nowrap transition-colors">
+              <span class="w-2 h-2 rounded-full bg-emerald-600"></span> Servicios
+            </button>
+            <button onclick="setCategory('Vehículos y Rodados')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200 font-medium whitespace-nowrap transition-colors">
+              <span class="w-2 h-2 rounded-full bg-orange-600"></span> Vehículos
+            </button>
+            <button onclick="setCategory('Inmuebles y Alquileres')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-medium whitespace-nowrap transition-colors">
+              <span class="w-2 h-2 rounded-full bg-indigo-600"></span> Inmuebles
+            </button>
+          </div>
+
+          <!-- Contenedor del Mapa Leaflet -->
+          <div class="relative w-full h-[450px] lg:h-[520px] bg-slate-100">
+            <div id="main-marketplace-map" class="w-full h-full"></div>
+          </div>
+
+          <!-- Pie del mapa con sugerencia y botón para alternar -->
+          <div class="p-3 bg-slate-50 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+            <span class="flex items-center gap-1.5"><i class="fas fa-hand-pointer text-gold-600"></i> Haz clic en los pines para abrir la ficha rápida</span>
+            <button onclick="toggleMapFullscreen()" id="expand-map-btn" class="font-bold text-navy-900 hover:text-gold-700 underline flex items-center gap-1">
+              <i class="fas fa-expand-alt text-xs"></i> <span id="expand-map-text">Ampliar Mapa</span>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==================== PANEL DE LA CUADRÍCULA DE AVISOS ==================== -->
+      <section id="grid-section" class="lg:col-span-7 w-full transition-all duration-300">
+
+        <!-- ==================== GRID DE PRODUCTOS ==================== -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <!-- Tarjetas renderizadas dinámicamente con JavaScript con estilo 3D y VM Hub -->
+        </div>
+
+        <!-- ==================== ESTADO VACÍO (SIN RESULTADOS) ==================== -->
+        <div id="empty-state" class="hidden py-16 text-center max-w-md mx-auto">
+      <div class="w-16 h-16 rounded-2xl bg-navy-900 border border-gold-500/30 text-gold-400 flex items-center justify-center mx-auto mb-4 text-2xl shadow-soft-3d">
+        <i class="fas fa-search"></i>
+      </div>
+      <h3 class="text-lg font-bold text-navy-950 mb-1">No encontramos avisos para esta búsqueda</h3>
+      <p class="text-sm text-slate-500 mb-6">
+        Prueba cambiando las palabras clave, seleccionando otra localidad o restableciendo los filtros de categoría.
+      </p>
+      <button 
+        onclick="AppState.selectedCategory='all'; AppState.selectedCity='all'; AppState.onlyFavorites=false; document.getElementById('city-filter').value='all'; handleSearchInput(''); updateCategoryBadges();"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-850 text-gold-300 border border-gold-500/40 text-xs font-bold transition-all shadow-md shadow-navy-950/20"
+      >
+        <i class="fas fa-redo"></i> Restablecer todos los filtros
+      </button>
+    </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+
+  <!-- ==================== MODAL DE CONFIGURACIÓN SUPABASE ==================== -->
+  <div id="supabase-modal" class="fixed inset-0 z-50 hidden bg-navy-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="relative bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Encabezado modal corporativo -->
+      <div class="px-6 py-5 border-b border-[#1C2F5E] flex items-center justify-between bg-navy-900 text-white">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gold-metallic text-navy-950 flex items-center justify-center font-black shadow-md text-base">
+            <i class="fas fa-database"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-white text-base">Conexión con Supabase</h3>
+            <p class="text-xs text-gold-300">Base de datos PostgreSQL en la nube y Realtime</p>
+          </div>
+        </div>
+        <button 
+          type="button" 
+          onclick="closeSupabaseModal()"
+          class="w-8 h-8 rounded-full bg-navy-800 hover:bg-navy-700 text-slate-300 hover:text-white flex items-center justify-center transition-all"
+        >
+          <i class="fas fa-times text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Contenido del modal -->
+      <div class="p-6 space-y-4">
+        
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Ingresa la URL y la API Key Anónima de tu proyecto en <a href="https://supabase.com/dashboard" target="_blank" class="text-navy-900 underline font-bold">Supabase Dashboard</a> (en <em>Project Settings &rarr; API</em>).
+        </p>
+
+        <!-- Formulario de credenciales -->
+        <form id="supabase-config-form" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-navy-950 mb-1" for="supabase-url-input">
+              Project URL <span class="text-red-500">*</span>
+            </label>
+            <input 
+              type="url" 
+              id="supabase-url-input" 
+              required 
+              placeholder="https://odqdprxxxmpyintbnvof.supabase.co"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-xs font-mono text-slate-800"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-navy-950 mb-1" for="supabase-key-input">
+              Project API Anon Key (public) <span class="text-red-500">*</span>
+            </label>
+            <textarea 
+              id="supabase-key-input" 
+              rows="3" 
+              required 
+              placeholder="sb_publishable_..."
+              class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-xs font-mono text-slate-800 resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Estado de conexión -->
+          <div id="supabase-modal-status" class="hidden p-3 rounded-xl text-xs font-medium flex items-center gap-2"></div>
+
+          <!-- Botones de Acción -->
+          <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <button 
+              type="button"
+              onclick="testSupabaseConnection()"
+              id="supabase-test-btn"
+              class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-navy-950 text-xs font-bold transition-all flex items-center justify-center gap-2"
+            >
+              <i class="fas fa-vial text-gold-600"></i> Probar Conexión
+            </button>
+
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <button 
+                type="button" 
+                onclick="closeSupabaseModal()"
+                class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+              >
+                Cancelar
+              </button>
+              <button 
+                type="submit"
+                class="px-5 py-2.5 rounded-xl bg-gold-metallic text-navy-950 text-xs font-black shadow-md shadow-gold-500/25 border border-amber-200/40 hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              >
+                <i class="fas fa-save"></i> Guardar y Conectar
+              </button>
+            </div>
+          </div>
+
+          <!-- Opción para sembrar catálogo de muestra en Supabase -->
+          <div class="text-center pt-2">
+            <button 
+              type="button" 
+              onclick="seedSampleProductsToSupabase()" 
+              id="seed-btn" 
+              class="text-xs text-navy-900 hover:text-gold-700 underline font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <i class="fas fa-cloud-upload-alt text-gold-600"></i> ¿Quieres sumar también los 8 avisos de muestra de San Luis a tu Supabase?
+            </button>
+          </div>
+        </form>
+
+        <!-- Bloque desplegable de SQL para crear la tabla -->
+        <div class="pt-3 border-t border-slate-100">
+          <details class="text-xs group">
+            <summary class="font-bold text-navy-950 cursor-pointer hover:text-gold-600 flex items-center justify-between select-none">
+              <span><i class="fas fa-terminal mr-1 text-gold-600"></i> Script SQL para la tabla 'products' (con moderación)</span>
+              <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="mt-2 p-3 bg-navy-950 rounded-xl text-slate-200 font-mono text-[11px] overflow-x-auto relative border border-gold-500/20">
+              <button 
+                type="button"
+                onclick="copySqlScript()"
+                id="copy-sql-btn"
+                class="absolute top-2 right-2 bg-navy-800 hover:bg-navy-700 text-gold-300 border border-gold-500/30 px-2 py-1 rounded text-[10px] font-sans flex items-center gap-1 transition-all"
+              >
+                <i class="fas fa-copy"></i> Copiar SQL
+              </button>
+              <pre id="sql-script-code">-- Copia y pega esto en el SQL Editor de Supabase:
+CREATE TABLE IF NOT EXISTS products (
+  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  title TEXT NOT NULL,
+  price NUMERIC NOT NULL,
+  category TEXT NOT NULL,
+  city TEXT NOT NULL,
+  address TEXT,
+  lat NUMERIC,
+  lng NUMERIC,
+  description TEXT,
+  seller TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  image TEXT,
+  featured BOOLEAN DEFAULT FALSE,
+  estado TEXT DEFAULT 'aprobado'
+);
+
+-- Si la tabla ya fue creada anteriormente, agrega las columnas de geolocalización y moderación:
+ALTER TABLE products ADD COLUMN IF NOT EXISTS estado TEXT DEFAULT 'aprobado';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS lat NUMERIC;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS lng NUMERIC;
+UPDATE products SET estado = 'aprobado' WHERE estado IS NULL;
+
+-- Habilitar Row Level Security
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+
+-- Políticas de lectura e inserción pública
+CREATE POLICY "Lectura publica" ON products FOR SELECT USING (true);
+CREATE POLICY "Publicacion publica" ON products FOR INSERT WITH CHECK (true);
+
+-- Habilitar Realtime para esta tabla
+ALTER PUBLICATION supabase_realtime ADD TABLE products;</pre>
+            </div>
+          </details>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== MODAL DE CONFIGURACIÓN DE GOOGLE MAPS ==================== -->
+  <div id="modal-google-maps" class="fixed inset-0 z-50 hidden bg-navy-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="relative bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Cabecera del modal -->
+      <div class="bg-navy-metallic p-6 text-white border-b border-navy-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gold-metallic text-navy-950 flex items-center justify-center shadow-soft-3d text-lg font-black">
+            <i class="fab fa-google"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base text-gold-200 leading-tight">Google Maps Platform</h3>
+            <p class="text-xs text-slate-300">Modo Prototipo con Maps Demo Key (Sin Tarjeta)</p>
+          </div>
+        </div>
+        <button 
+          type="button" 
+          onclick="closeGoogleMapsModal()"
+          class="w-8 h-8 rounded-full bg-navy-900/60 hover:bg-navy-900 text-slate-300 hover:text-white flex items-center justify-center transition-colors border border-navy-700/50"
+        >
+          <i class="fas fa-times text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Contenido del modal -->
+      <div class="p-6 space-y-4">
+        
+        <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200/80 text-xs text-amber-950 space-y-2">
+          <div class="font-bold flex items-center gap-1.5 text-amber-900">
+            <i class="fas fa-bolt text-gold-600"></i> ¿Cómo obtener tu Maps Demo Key gratuita?
+          </div>
+          <ol class="list-decimal list-inside space-y-1 text-slate-700 leading-relaxed">
+            <li>Ingresa a <a href="https://mapsplatform.google.com/maps-demo-key?utm_campaign=gmp_git_agentskills_v1" target="_blank" class="text-navy-900 underline font-bold">Google Maps Demo Key Quickstart</a>.</li>
+            <li>Inicia sesión con tu cuenta de Google (personal, <strong>sin tarjeta de crédito</strong>).</li>
+            <li>Acepta los términos del <em>Maps Demo Project</em>.</li>
+            <li>Copia la clave generada (comienza con <code class="bg-amber-100 text-amber-900 px-1 py-0.5 rounded font-mono">AIza...</code>).</li>
+            <li>Pégala aquí abajo y presiona <strong>Guardar y Activar</strong>.</li>
+          </ol>
+        </div>
+
+        <!-- Formulario de API Key -->
+        <form id="google-maps-config-form" onsubmit="handleSaveGoogleMapsKey(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-navy-950 mb-1" for="gmaps-key-input">
+              Google Maps API Key (o Maps Demo Key) <span class="text-red-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="gmaps-key-input" 
+              required 
+              placeholder="AIzaSy..."
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-xs font-mono text-slate-800"
+            />
+            <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+              <i class="fas fa-shield-alt text-slate-400"></i> Se guardará de forma local en tu navegador para habilitar el mapa y Places Autocomplete.
+            </p>
+          </div>
+
+          <!-- Estado de activación -->
+          <div id="gmaps-modal-status" class="hidden p-3 rounded-xl text-xs font-medium flex items-center gap-2"></div>
+
+          <!-- Botones de Acción -->
+          <div class="pt-2 flex items-center justify-end gap-2">
+            <button 
+              type="button" 
+              onclick="closeGoogleMapsModal()"
+              class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit"
+              class="px-5 py-2.5 rounded-xl bg-gold-metallic text-navy-950 text-xs font-black shadow-md shadow-gold-500/25 border border-amber-200/40 hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            >
+              <i class="fas fa-check-circle"></i> Guardar y Activar
+            </button>
+          </div>
+        </form>
+
+        <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 flex items-center justify-between">
+          <span>Servicios activos: Maps JS API &bull; Places Autocomplete &bull; Geocoding</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== MODAL DE DETALLE DE PRODUCTO ==================== -->
+  <div id="detail-modal" class="fixed inset-0 z-50 hidden bg-navy-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="relative bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-200">
+      <button 
+        type="button" 
+        onclick="closeDetailModal()"
+        class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm text-slate-500 hover:text-navy-950 hover:bg-white flex items-center justify-center shadow-md transition-all border border-slate-200"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+      <div id="detail-modal-content">
+        <!-- Inyectado por app.js -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== MODAL PUBLICAR PRODUCTO ==================== -->
+  <div id="publish-modal" class="fixed inset-0 z-50 hidden bg-navy-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="relative bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Encabezado modal corporativo -->
+      <div class="px-6 py-5 border-b border-[#1C2F5E] flex items-center justify-between bg-navy-900 text-white">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gold-metallic text-navy-950 flex items-center justify-center font-black shadow-md">
+            <i class="fas fa-bullhorn text-sm"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-white text-base">Publicar un nuevo aviso</h3>
+            <p class="text-xs text-gold-300">Se guardará de forma dinámica en la nube</p>
+          </div>
+        </div>
+        <button 
+          type="button" 
+          onclick="closePublishModal()"
+          class="w-8 h-8 rounded-full bg-navy-800 hover:bg-navy-700 text-slate-300 hover:text-white flex items-center justify-center transition-all"
+        >
+          <i class="fas fa-times text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Formulario de Publicación -->
+      <form id="publish-form" class="p-6 space-y-4">
+        
+        <!-- Título -->
+        <div>
+          <label class="block text-xs font-bold text-navy-950 mb-1" for="prod-title">
+            Título del producto o servicio <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="prod-title" 
+            required 
+            placeholder="Ej: Smart TV 43 pulgadas Samsung casi nuevo"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-sm text-slate-800"
+          />
+        </div>
+
+        <!-- Precio y Categoría -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-navy-950 mb-1" for="prod-price">
+              Precio en $ ARS <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
+              <input 
+                type="number" 
+                id="prod-price" 
+                required 
+                min="0"
+                step="100"
+                placeholder="45000"
+                class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-sm text-slate-800 font-bold"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-navy-950 mb-1" for="prod-category">
+              Categoría <span class="text-red-500">*</span>
+            </label>
+            <select 
+              id="prod-category" 
+              required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-sm text-slate-800 bg-white font-medium"
+            >
+              <option value="Gastronomía y Cafeterías">Cafeterías y Gastronomía</option>
+              <option value="Moda y Ropa">Indumentaria y Moda</option>
+              <option value="Tecnología">Tecnología y Celulares</option>
+              <option value="Servicios">Servicios y Oficios</option>
+              <option value="Vehículos y Rodados">Vehículos y Rodados</option>
+              <option value="Hogar y Muebles">Hogar y Muebles</option>
+              <option value="Inmuebles y Alquileres">Inmuebles y Alquileres</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Ciudad y WhatsApp -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-navy-950 mb-1" for="prod-city">
+              Ubicación en San Luis <span class="text-red-500">*</span>
+            </label>
+            <select 
+              id="prod-city" 
+              required
+              onchange="handlePublishCityChange(this.value)"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-sm text-slate-800 bg-white font-medium"
+            >
+              <option value="Villa Mercedes">Villa Mercedes</option>
+              <option value="San Luis Capital">San Luis Capital</option>
+              <option value="Merlo">Villa de Merlo</option>
+              <option value="Juana Koslay">Juana Koslay</option>
+              <option value="La Punta">La Punta</option>
+              <option value="Potrero de los Funes">Potrero de los Funes</option>
+              <option value="El Trapiche">El Trapiche</option>
+              <option value="Carpintería">Carpintería</option>
+              <option value="Concarán">Concarán</option>
+              <option value="Santa Rosa del Conlara">Santa Rosa del Conlara</option>
+              <option value="Quines">Quines</option>
+              <option value="Otra localidad">Otra localidad</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-navy-950 mb-1" for="prod-phone">
+              WhatsApp de Contacto <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <i class="fab fa-whatsapp absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-500 text-base"></i>
+              <input 
+                type="tel" 
+                id="prod-phone" 
+                required 
+                placeholder="2664123456"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-sm text-slate-800 font-medium"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Nombre del vendedor -->
+        <div>
+          <label class="block text-xs font-bold text-navy-950 mb-1" for="prod-seller">
+            Tu Nombre o Negocio Comercial <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="prod-seller" 
+            required 
+            placeholder="Ej: Cafetería Central, Marcos Pérez o Electro San Luis"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-sm text-slate-800 font-medium"
+          />
+        </div>
+
+        <!-- Dirección exacta del local o punto de encuentro con Google Places Autocomplete -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-navy-950" for="prod-address">
+              Dirección o Calle <span class="text-slate-400 font-normal">(San Luis, Villa Mercedes y alrededores)</span>
+            </label>
+            <span class="text-[10px] text-gold-700 bg-gold-50 px-2 py-0.5 rounded-full font-bold border border-gold-200">
+              <i class="fab fa-google text-navy-950"></i> Google Places
+            </span>
+          </div>
+
+          <!-- Contenedor para elemento web oficial de Place Autocomplete -->
+          <div id="gmp-autocomplete-wrapper" class="mb-2"></div>
+
+          <div class="relative">
+            <i class="fas fa-map-pin absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input 
+              type="text" 
+              id="prod-address" 
+              placeholder="Ej: Pedernera 430 (Villa Mercedes) o Av. Illia 250 (San Luis)"
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-sm text-slate-800 font-medium"
+            />
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+            <i class="fas fa-magic text-gold-600"></i> Al autocompletar la dirección se detectará la ciudad y se calculará la latitud/longitud exacta.
+          </p>
+        </div>
+
+        <!-- Ubicación en el Mapa con selector interactivo Google Maps -->
+        <div class="space-y-1.5 pt-1">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-navy-950 flex items-center gap-1.5">
+              <i class="fas fa-map-location-dot text-gold-600"></i>
+              Pin de Ubicación <span class="text-[11px] text-slate-400 font-normal">(Arrastra el pin para ajustar)</span>
+            </label>
+            <button 
+              type="button" 
+              onclick="locatePublishUserGps()" 
+              class="text-[11px] font-bold text-navy-900 hover:text-gold-700 inline-flex items-center gap-1 transition-colors"
+            >
+              <i class="fas fa-crosshairs text-gold-600"></i> Mi GPS actual
+            </button>
+          </div>
+          <div class="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
+            <div id="publish-mini-map" class="w-full h-40 z-0"></div>
+            <div class="absolute bottom-2 left-2 right-2 z-[400] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-slate-200 text-[11px] text-slate-600 flex items-center justify-between shadow-sm">
+              <span id="publish-coord-label" class="font-medium truncate"><i class="fas fa-hand-pointer text-gold-600 mr-1"></i> Toca o arrastra el pin en el mapa</span>
+              <span id="publish-coord-values" class="font-mono text-[10px] text-slate-400 hidden"></span>
+            </div>
+          </div>
+          <input type="hidden" id="prod-lat" value="" />
+          <input type="hidden" id="prod-lng" value="" />
+        </div>
+
+        <!-- Carga de Foto (Archivo o URL) -->
+        <div>
+          <label class="block text-xs font-bold text-navy-950 mb-1">
+            Foto del producto
+          </label>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-gold-500 rounded-xl p-3 cursor-pointer transition-colors bg-slate-50 hover:bg-gold-50/30 text-center h-full">
+                <i class="fas fa-camera text-slate-400 text-lg mb-1"></i>
+                <span class="text-xs font-medium text-slate-600">Subir desde dispositivo</span>
+                <input type="file" id="product-image-file" accept="image/*" class="hidden" />
+              </label>
+            </div>
+            <div>
+              <input 
+                type="url" 
+                id="product-image-url" 
+                placeholder="O pega link de imagen (https://...)" 
+                class="w-full h-full px-3 py-2 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-xs text-slate-800"
+              />
+            </div>
+          </div>
+
+          <!-- Previsualización -->
+          <div id="image-preview-container" class="hidden mt-3 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-3">
+            <img id="image-preview" src="" alt="Vista previa" class="w-14 h-14 object-cover rounded-lg" />
+            <span class="text-xs text-slate-500 font-medium">Foto cargada correctamente</span>
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div>
+          <label class="block text-xs font-bold text-navy-950 mb-1" for="prod-desc">
+            Descripción y detalles <span class="text-red-500">*</span>
+          </label>
+          <textarea 
+            id="prod-desc" 
+            rows="3" 
+            required 
+            placeholder="Describe el estado, accesorios incluidos, tiempo de uso, si realizas envíos en San Luis o punto de encuentro..."
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-gold-500 focus:ring-4 focus:ring-gold-500/10 outline-none text-sm text-slate-800 resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+          <button 
+            type="button" 
+            onclick="closePublishModal()"
+            class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+          >
+            Cancelar
+          </button>
+          <button 
+            type="submit"
+            id="publish-submit-btn"
+            class="px-6 py-2.5 rounded-xl bg-gold-metallic text-navy-950 text-xs font-black shadow-md shadow-gold-500/25 border border-amber-200/40 hover:shadow-lg active:scale-95 transition-all flex items-center gap-2"
+          >
+            <i class="fas fa-check"></i> <span id="publish-submit-text">Publicar Aviso</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ==================== NOTIFICACIÓN TOAST ==================== -->
+  <div 
+    id="toast" 
+    class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 ease-out bg-navy-950 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-gold-500/40 text-sm font-medium"
+  >
+    <div id="toast-icon-container" class="w-8 h-8 rounded-full bg-gold-500/20 text-gold-300 flex items-center justify-center text-xs">
+      <i class="fas fa-check" id="toast-icon"></i>
+    </div>
+    <span id="toast-message">Mensaje del sistema</span>
+  </div>
+
+
+  <!-- ==================== FOOTER CORPORATIVO VM HUB ==================== -->
+  <footer class="bg-navy-950 border-t border-[#1C2F5E] mt-12 pt-12 pb-8 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-navy-800">
+        
+        <div>
+          <div class="flex items-center gap-2.5 mb-3">
+            <div class="w-8 h-8 rounded-lg bg-[#0F1A34] border border-gold-500/40 flex items-center justify-center text-gold-300 font-extrabold text-xs shadow-sm">
+              VM
+            </div>
+            <span class="font-extrabold text-white text-sm">VM Hub &bull; Marketplace San Luis</span>
+          </div>
+          <p class="leading-relaxed text-slate-400">
+            Plataforma comercial diseñada para conectar comercios, emprendedores y usuarios de toda la provincia de San Luis con tecnología ágil y contacto directo.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white text-sm mb-3 flex items-center gap-1.5">
+            <i class="fas fa-shield-alt text-gold-400"></i> Consejos de seguridad comercial
+          </h4>
+          <ul class="space-y-1.5 list-disc list-inside text-slate-400">
+            <li>Coordina entregas en locales comerciales o puntos públicos concurridos.</li>
+            <li>Revisa el estado del producto antes de realizar pagos o transferencias.</li>
+            <li>Realiza tus consultas y acuerdos de manera directa y transparente.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white text-sm mb-3 flex items-center gap-1.5">
+            <i class="fas fa-location-dot text-gold-400"></i> Cobertura Provincial
+          </h4>
+          <p class="leading-relaxed text-slate-400">
+            Villa Mercedes, San Luis Capital, Merlo, Juana Koslay, La Punta, Potrero de los Funes, El Trapiche, Carpintería y localidades vecinas.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left text-slate-500">
+        <div>&copy; 2026 <strong>VM Hub</strong> &bull; Marketplace San Luis. Desarrollado con Supabase Realtime, HTML5 y Tailwind CSS.</div>
+        <div class="flex items-center gap-4">
+          <span id="footer-status-indicator" class="inline-flex items-center gap-1.5 text-gold-400 font-semibold cursor-pointer" onclick="openSupabaseModal()">
+            <span class="w-2 h-2 rounded-full bg-gold-400"></span> Conexión Supabase
+          </span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script principal -->
+  <script src="app.js"></script>
+</body>
+</html>
